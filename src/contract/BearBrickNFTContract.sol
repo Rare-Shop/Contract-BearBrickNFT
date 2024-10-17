@@ -195,8 +195,6 @@ contract BearBrickNFTContract is
             }
         }
 
-        
-
         if (postage > 0) {
             IERC20 erc20Token = IERC20(payTokenAddress);
             erc20Token.safeTransferFrom(
