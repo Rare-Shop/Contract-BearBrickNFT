@@ -38,7 +38,38 @@ contract BearBrickNFTContract is
     uint256 public constant PRIVILEGE_ID = 1;
 
     uint256 public constant TOTAL_SUPPLY = 30;
-    uint256[] private TOKEN_ID_ARR = [1, 2, 3];
+    uint256[] private TOKEN_ID_ARR = [
+        1,
+        21,
+        3,
+        41,
+        5,
+        61,
+        7,
+        81,
+        9,
+        12,
+        2,
+        32,
+        4,
+        52,
+        6,
+        72,
+        8,
+        92,
+        1,
+        25,
+        3,
+        45,
+        5,
+        65,
+        7,
+        85,
+        9,
+        15,
+        19,
+        10
+    ];
     uint256 private _nextTokenIndex;
 
     mapping(uint256 tokenId => address to) public tokenPrivilegeAddress;
@@ -147,62 +178,6 @@ contract BearBrickNFTContract is
         addressPrivilegedUsedToken[_to].push(_tokenId);
 
         emit PrivilegeExercised(sender, _to, _tokenId, _privilegeId);
-    }
-
-    function exercisePrivilegeBatch(
-        ExercisePrivilegeData[] memory exercisePrivilegeDataArr,
-        uint256 _privilegeId,
-        bytes calldata _data
-    ) external checkPrivilegeId(_privilegeId) {
-        address sender = _msgSender();
-        (address payTokenAddress, uint256 postage) = abi.decode(
-            _data,
-            (address, uint256)
-        );
-        require(
-            payTokenAddress == USDT_ADDRESS || payTokenAddress == USDC_ADDRESS,
-            "Only support USDT/USDC"
-        );
-
-        for (uint256 i = 0; i < exercisePrivilegeDataArr.length; ) {
-            ExercisePrivilegeData
-                memory exercisePrivilegeData = exercisePrivilegeDataArr[i];
-            uint256 _tokenId = exercisePrivilegeData._tokenId;
-            address _to = exercisePrivilegeData._to;
-
-            address tokenOwner = _requireOwned(_tokenId);
-            require(
-                sender == tokenOwner,
-                "Invalid address: sender must be owner of tokenID"
-            );
-            require(
-                _to == tokenOwner,
-                "Invalid address: _to must be owner of _tokenId"
-            );
-
-            require(
-                tokenPrivilegeAddress[_tokenId] == address(0),
-                "The tokenID has been exercised"
-            );
-            postageMessage[_tokenId] = postage;
-
-            tokenPrivilegeAddress[_tokenId] = _to;
-            addressPrivilegedUsedToken[_to].push(_tokenId);
-
-            emit PrivilegeExercised(sender, _to, _tokenId, _privilegeId);
-            unchecked {
-                ++i;
-            }
-        }
-
-        if (postage > 0) {
-            IERC20 erc20Token = IERC20(payTokenAddress);
-            erc20Token.safeTransferFrom(
-                sender,
-                POSTAGE_RECEIPIENT_ADDRESS,
-                postage
-            );
-        }
     }
 
     function isExercisable(
