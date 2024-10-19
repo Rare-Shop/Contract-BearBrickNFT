@@ -33,12 +33,34 @@ contract BearBrickNFTContract is
     address public constant USDC_ADDRESS =
         0xBAfC2b82E53555ae74E1972f3F25D8a0Fc4C3682;
 
-    uint256 public constant MINT_PRICE = 998 * 10 ** 6;
+    uint256 public constant MINT_PRICE = 988 * 10 ** 6;
 
     uint256 public constant PRIVILEGE_ID = 1;
 
     uint256 public constant TOTAL_SUPPLY = 30;
-    uint256[] private TOKEN_ID_ARR = [
+    uint256[] private TOKEN_ID_ARR;
+    uint256 private _nextTokenIndex;
+
+    mapping(uint256 tokenId => address to) public tokenPrivilegeAddress;
+    mapping(address to => uint256[] tokenIds) public addressPrivilegedUsedToken;
+    mapping(uint256 tokenId => uint256 postage) public postageMessage;
+
+    struct ExercisePrivilegeData {
+        address _to;
+        uint256 _tokenId;
+    }
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(address initialOwner) external initializer {
+        __ERC721_init(unicode"BE@RBRICK-清明上河圖1000%", "BEARBRCIK_QM");
+        __Ownable_init(initialOwner);
+        __UUPSUpgradeable_init();
+
+        TOKEN_ID_ARR = [
         1,
         21,
         3,
@@ -70,26 +92,6 @@ contract BearBrickNFTContract is
         19,
         10
     ];
-    uint256 private _nextTokenIndex;
-
-    mapping(uint256 tokenId => address to) public tokenPrivilegeAddress;
-    mapping(address to => uint256[] tokenIds) public addressPrivilegedUsedToken;
-    mapping(uint256 tokenId => uint256 postage) public postageMessage;
-
-    struct ExercisePrivilegeData {
-        address _to;
-        uint256 _tokenId;
-    }
-
-    /// @custom:oz-upgrades-unsafe-allow constructor
-    constructor() {
-        _disableInitializers();
-    }
-
-    function initialize(address initialOwner) external initializer {
-        __ERC721_init(unicode"BE@RBRICK-清明上河圖1000%", "BEARBRCIK_QM");
-        __Ownable_init(initialOwner);
-        __UUPSUpgradeable_init();
     }
 
     modifier checkPrivilegeId(uint256 _privilegeId) {
