@@ -41,6 +41,7 @@ contract BearBrickNFTContract is
     uint256[] private TOKEN_ID_ARR;
     uint256 private _nextTokenIndex;
 
+    mapping(address => bool) public mintedAddress;
     mapping(uint256 tokenId => address to) public tokenPrivilegeAddress;
     mapping(address to => uint256[] tokenIds) public addressPrivilegedUsedToken;
     mapping(uint256 tokenId => uint256 postage) public postageMessage;
@@ -61,37 +62,37 @@ contract BearBrickNFTContract is
         __UUPSUpgradeable_init();
 
         TOKEN_ID_ARR = [
-        1,
-        21,
-        3,
-        41,
-        5,
-        61,
-        7,
-        81,
-        9,
-        12,
-        2,
-        32,
-        4,
-        52,
-        6,
-        72,
-        8,
-        92,
-        1,
-        25,
-        3,
-        45,
-        5,
-        65,
-        7,
-        85,
-        9,
-        15,
-        19,
-        10
-    ];
+            1,
+            21,
+            3,
+            41,
+            5,
+            61,
+            7,
+            81,
+            9,
+            12,
+            2,
+            32,
+            4,
+            52,
+            6,
+            72,
+            8,
+            92,
+            1,
+            25,
+            3,
+            45,
+            5,
+            65,
+            7,
+            85,
+            9,
+            15,
+            19,
+            10
+        ];
     }
 
     modifier checkPrivilegeId(uint256 _privilegeId) {
@@ -99,39 +100,34 @@ contract BearBrickNFTContract is
         _;
     }
 
-    function mint(address payTokenAddress, uint256 amounts) external {
+    function mint(address payTokenAddress) external {
         address sender = _msgSender();
+        require(
+            mintedAddress[sender] == false,
+            "An address can only be mint once"
+        );
         require(
             payTokenAddress == USDT_ADDRESS || payTokenAddress == USDC_ADDRESS,
             "Only support USDT/USDC"
         );
-        require(
-            amounts > 0 && _nextTokenIndex + amounts <= TOTAL_SUPPLY,
-            "Invalid amounts"
-        );
+        require(_nextTokenIndex < TOTAL_SUPPLY, "Exceed maximum limit");
         IERC20 erc20Token = IERC20(payTokenAddress);
-        uint256 payPrice = MINT_PRICE * amounts;
         require(
-            erc20Token.balanceOf(sender) >= payPrice,
+            erc20Token.balanceOf(sender) >= MINT_PRICE,
             "Insufficient USD balance"
         );
         require(
-            erc20Token.allowance(sender, address(this)) >= payPrice,
+            erc20Token.allowance(sender, address(this)) >= MINT_PRICE,
             "Allowance not set for USD"
         );
 
         erc20Token.safeTransferFrom(
             sender,
             PAYMENT_RECEIPIENT_ADDRESS,
-            payPrice
+            MINT_PRICE
         );
-
-        for (uint256 i = 0; i < amounts; ) {
-            _mint(sender, TOKEN_ID_ARR[_nextTokenIndex++]);
-            unchecked {
-                ++i;
-            }
-        }
+        mintedAddress[sender] = true;
+        _mint(sender, TOKEN_ID_ARR[_nextTokenIndex++]);
     }
 
     function exercisePrivilege(
