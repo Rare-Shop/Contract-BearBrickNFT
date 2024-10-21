@@ -46,6 +46,10 @@ contract BearBrickNFTContract is
     mapping(address to => uint256[] tokenIds) public addressPrivilegedUsedToken;
     mapping(uint256 tokenId => uint256 postage) public postageMessage;
 
+    mapping(address => bool) public whitelist;
+
+    mapping(address => bool) public wlMinted;
+
     struct ExercisePrivilegeData {
         address _to;
         uint256 _tokenId;
@@ -102,10 +106,16 @@ contract BearBrickNFTContract is
 
     function mint(address payTokenAddress) external {
         address sender = _msgSender();
+
         require(
-            mintedAddress[sender] == false,
-            "An address can only be mint once"
+            whitelist[sender] == true,
+            "Invalid address: Only white address can be mint"
         );
+        require(
+            wlMinted[sender] == false,
+            "Invalid address: An address can only be mint once"
+        );
+
         require(
             payTokenAddress == USDT_ADDRESS || payTokenAddress == USDC_ADDRESS,
             "Only support USDT/USDC"
@@ -126,7 +136,7 @@ contract BearBrickNFTContract is
             PAYMENT_RECEIPIENT_ADDRESS,
             MINT_PRICE
         );
-        mintedAddress[sender] = true;
+        wlMinted[sender] = true;
         _mint(sender, TOKEN_ID_ARR[_nextTokenIndex++]);
     }
 
@@ -228,6 +238,12 @@ contract BearBrickNFTContract is
         _requireOwned(_tokenId);
         privilegeIds = new uint256[](1);
         privilegeIds[0] = PRIVILEGE_ID;
+    }
+
+    function addWhitelist(address[] calldata _addresses) external onlyOwner {
+        for (uint i = 0; i < _addresses.length; i++) {
+            whitelist[_addresses[i]] = true;
+        }
     }
 
     function setMetadataRenderer(address _metadataRenderer) external onlyOwner {
