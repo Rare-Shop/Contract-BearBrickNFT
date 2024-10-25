@@ -25,13 +25,13 @@ contract BearBrickNFTContract is
     address public privilegeMetadataRenderer;
 
     address public constant PAYMENT_RECEIPIENT_ADDRESS =
-        0x3De70dA882f101b4b3d5f3393c7f90e00E64edB9;
+        0x6414Cf36cb225c333C670b32f41578397843E9b1;
     address public constant POSTAGE_RECEIPIENT_ADDRESS =
-        0xC565FC29F6df239Fe3848dB82656F2502286E97d;
+        0xC34f5933785B6cAB6bE046649D6702358323Bc2A;
     address public constant USDT_ADDRESS =
-        0xED85184DC4BECf731358B2C63DE971856623e056;
+        0x05D032ac25d322df992303dCa074EE7392C117b9;
     address public constant USDC_ADDRESS =
-        0xBAfC2b82E53555ae74E1972f3F25D8a0Fc4C3682;
+        0xb62F35B9546A908d11c5803ecBBA735AbC3E3eaE;
 
     uint256 public constant MINT_PRICE = 988 * 10 ** 6;
 
@@ -49,6 +49,7 @@ contract BearBrickNFTContract is
     mapping(address => bool) public whitelist;
 
     mapping(address => bool) public wlMinted;
+    bool public saleStatus;
 
     struct ExercisePrivilegeData {
         address _to;
@@ -103,8 +104,12 @@ contract BearBrickNFTContract is
         require(_privilegeId == PRIVILEGE_ID, "Invalid _privilegeId");
         _;
     }
-
+    function updateSaleStatus(bool _saleStatus) external onlyOwner {
+        saleStatus = _saleStatus;
+    }
     function mint(address payTokenAddress) external {
+        require(saleStatus == true, "Not yet available for sale");
+
         address sender = _msgSender();
 
         require(
